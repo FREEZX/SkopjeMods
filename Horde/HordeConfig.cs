@@ -214,7 +214,7 @@ namespace Skopje.Horde
             {
                 District = district,
                 Name = zone,
-                Override = config.Bind(section, "Override", false, (string)null),
+                Override = config.Bind(section, "Override", false, string.Empty),
             };
 
             for (int i = 0; i < Fields.Length; i++)
@@ -226,7 +226,7 @@ namespace Skopje.Horde
         static void BindField(ConfigFile config, string section, FieldDef field, ZoneSettings zone, bool global)
         {
             // The explanation is written once, above the first global setting.
-            string description = global && field.Key == PopulationKey ? Explanation : null;
+            string description = global && field.Key == PopulationKey ? Explanation : string.Empty;
             ConfigDescription configDescription = field.IsFloat
                 ? new ConfigDescription(description, new AcceptableValueRange<float>(field.FloatMin, field.FloatMax))
                 : new ConfigDescription(description, new AcceptableValueRange<int>(field.IntMin, field.IntMax));
