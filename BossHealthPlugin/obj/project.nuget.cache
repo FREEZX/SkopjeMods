@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "H27KblJKjqM=",
+  "success": true,
+  "projectFilePath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\BossHealthPlugin\\BossHealthPlugin.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\andre\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a0404811fc6e51c4c5761fd11591789f\\nuget\\microsoft.netcore.app.ref\\6.0.36\\microsoft.netcore.app.ref.6.0.36.nupkg.sha512",
+    "C:\\Users\\andre\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a0404811fc6e51c4c5761fd11591789f\\nuget\\microsoft.windowsdesktop.app.ref\\6.0.36\\microsoft.windowsdesktop.app.ref.6.0.36.nupkg.sha512",
+    "C:\\Users\\andre\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a0404811fc6e51c4c5761fd11591789f\\nuget\\microsoft.aspnetcore.app.ref\\6.0.36\\microsoft.aspnetcore.app.ref.6.0.36.nupkg.sha512"
+  ],
+  "logs": []
+}

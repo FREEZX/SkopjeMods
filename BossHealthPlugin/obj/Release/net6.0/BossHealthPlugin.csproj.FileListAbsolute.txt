@@ -1,0 +1,12 @@
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\BossHealthPlugin.csproj.AssemblyReference.cache
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\BossHealthPlugin.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\BossHealthPlugin.AssemblyInfoInputs.cache
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\BossHealthPlugin.AssemblyInfo.cs
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\BossHealthPlugin.csproj.CoreCompileInputs.cache
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\bin\Release\net6.0\Skopje.BossHealth.deps.json
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\bin\Release\net6.0\Skopje.BossHealth.dll
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\bin\Release\net6.0\Skopje.BossHealth.pdb
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\Skopje.BossHealth.dll
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\refint\Skopje.BossHealth.dll
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\Skopje.BossHealth.pdb
+c:\Users\andre\Desktop\SkopjeMods\BossHealthPlugin\obj\Release\net6.0\ref\Skopje.BossHealth.dll

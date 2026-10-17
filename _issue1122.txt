@@ -1,0 +1,56 @@
+--- a-l-e-k-k 2025-07-21T18:20:17Z
+No it's not a simple as use bleeding edge. The native-hook layer inside Il2CppInterop.Runtime.dll still can’t locate two critical functions (Class::Init, GarbageCollector::RunFinalizer) in a v31 Unity binary. When the fallback stub executes it dereferences garbage and the process dies.
+
+
+--- Delocca 2025-11-29T10:18:35Z
+Another affected game: Lonely Mountains: Snow Riders
+
+Game: https://store.steampowered.com/app/2545360/Lonely_Mountains_Snow_Riders/
+Unity Version: 2022.3.62f2 (released October 3, 2025)
+Platform: Windows (also tested via Proton on Linux — same result)
+BepInEx Version: 6.0.0-be.752
+
+Symptoms:
+
+Game crashes immediately during IL2CPP initialization. The doorstop hook loads successfully, but the process dies before BepInEx can write anything to the log.
+
+What I tried:
+
+- BepInEx BE 752 (latest at time of writing) → crash
+- MelonLoader 0.7.1 → same crash
+- Manually replacing Cpp2IL with version 2022.1.0-pre-release.20 (which includes "Fixed a bug in v31.0 (2021.3.40) support") → still crashes
+
+Conclusion:
+
+The Cpp2IL update alone doesn't seem to fix it. As mentioned by @a-l-e-k-k, the issue appears to be in Il2CppInterop.Runtime.dll which can't locate critical functions (Class::Init, GarbageCollector::RunFinalizer) in v31 binaries.
+
+This game uses a very recent Unity build (Oct 2025), so it would be a good test case for v31 support once a fix is available.
+
+---
+For any serious contributor willing to investigate this issue, I'm happy to gift the game on Steam.
+The game is also available on Xbox Game Pass. 
+
+--- ongandrew 2026-01-28T06:19:34Z
+I was able to get this working with Atelier Resleriana (Unity 2022.3.62f2) but can't confirm if it's a general fix.
+
+It involves two parts:
+1) `Logging.UnityLogListening` must be set to `false` in _BepInEx.cfg_.
+2) Include this signature definition in _Il2CppInterop/Il2CppInterop.Runtime/Injection/InjectorHelpers.cs_ for
+
+```
+            new MemoryUtils.SignatureDefinition
+            {
+                pattern = "\x48\x8B\xC4\x48\x89\x58\x00\x48\x89\x68\x00\x48\x89\x70\x00\x57\x41\x56\x41\x57\x48\x83\xEC\x00",
+                mask = "xxxxxx?xxx?xxx?xxxxxxxxx?",
+                xref = false
+            },
+```
+
+This was obtained by tracing through Ghidra + Il2CppDumper through the following path:
+
+1. Locate exposed function il2cpp_runtime_class_init. It'll be a wrapper with a single JMP instruction.
+2. Go to the location referenced by the JMP instruction, which is likely a thread-safe wrapper, and look for a CALL instruction that takes the class pointer. For this particular instance, it was the second CALL instruction.
+3. Then in this next function being called (likely another wrapper), there were three CALL instructions, it was the second CALL instruciton again (the first and last seemed to just acquire and release locks).
+4. Follow that CALL instruction - that turned out to be the Class::Init we were after.
+
+I don't have any other IL2CPP Unity games on hand with this version or above, so I'll leave it to those that come after to formally test it on a wider range and do a pull request!

@@ -1,0 +1,12 @@
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\HordePlugin.csproj.AssemblyReference.cache
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\HordePlugin.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\HordePlugin.AssemblyInfoInputs.cache
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\HordePlugin.AssemblyInfo.cs
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\HordePlugin.csproj.CoreCompileInputs.cache
+c:\Users\andre\Desktop\SkopjeMods\Horde\bin\Release\net6.0\Skopje.Horde.deps.json
+c:\Users\andre\Desktop\SkopjeMods\Horde\bin\Release\net6.0\Skopje.Horde.dll
+c:\Users\andre\Desktop\SkopjeMods\Horde\bin\Release\net6.0\Skopje.Horde.pdb
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\Skopje.Horde.dll
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\refint\Skopje.Horde.dll
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\Skopje.Horde.pdb
+c:\Users\andre\Desktop\SkopjeMods\Horde\obj\Release\net6.0\ref\Skopje.Horde.dll

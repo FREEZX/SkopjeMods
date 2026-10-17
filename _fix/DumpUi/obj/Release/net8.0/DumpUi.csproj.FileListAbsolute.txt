@@ -1,0 +1,17 @@
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\bin\Release\net8.0\DumpUi.exe
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\bin\Release\net8.0\DumpUi.deps.json
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\bin\Release\net8.0\DumpUi.runtimeconfig.json
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\bin\Release\net8.0\DumpUi.dll
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\bin\Release\net8.0\DumpUi.pdb
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\bin\Release\net8.0\System.Reflection.MetadataLoadContext.dll
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.csproj.AssemblyReference.cache
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.AssemblyInfoInputs.cache
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.AssemblyInfo.cs
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.csproj.CoreCompileInputs.cache
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.csproj.Up2Date
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.dll
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\refint\DumpUi.dll
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.pdb
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\DumpUi.genruntimeconfig.cache
+c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net8.0\ref\DumpUi.dll
