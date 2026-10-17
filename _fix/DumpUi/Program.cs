@@ -31,10 +31,21 @@ void Dump(string file, string typeName)
 static string EnumNames(Type t) => string.Join(",", t.GetEnumNames());
 
 var skopje = mlc.LoadFromAssemblyPath(Path.Combine(interop, "SkopjeAssembly.dll"));
+string[] names = { "EnemyBlockHelper", "NotDamageable", "IDamageable" };
 foreach (var type in skopje.GetTypes())
 {
-    if (type.Name != "CompassViewController" && type.Name != "CompassView") continue;
-    Console.WriteLine("TYPE " + type.FullName + " : " + type.BaseType?.FullName);
-    foreach (var p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
+    if (!names.Contains(type.Name)) continue;
+    Console.WriteLine("TYPE " + type.Name);
+    if (type.IsEnum)
+    {
+        Console.WriteLine("  " + string.Join(", ", type.GetEnumNames()));
+        continue;
+    }
+    foreach (var p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
         Console.WriteLine("  P " + p.PropertyType.Name + " " + p.Name);
+    foreach (var m in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
+    {
+        if (m.IsSpecialName) continue;
+        Console.WriteLine("  M " + m.ReturnType.Name + " " + m.Name);
+    }
 }

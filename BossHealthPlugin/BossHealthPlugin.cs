@@ -193,7 +193,7 @@ namespace Skopje.BossHealth
             {
                 _nextReadTime = Time.unscaledTime + FightReadSeconds;
                 if (_fights[0].StillGoing(out float ratio))
-                    Present(_fights[0].Name, ratio);
+                    Present(_fights[0].Name, ratio, _fights[0].IsImmune());
             }
             else
             {
@@ -223,10 +223,10 @@ namespace Skopje.BossHealth
             }
 
             if (_fights[0].StillGoing(out float ratio))
-                Present(_fights[0].Name, ratio);
+                Present(_fights[0].Name, ratio, _fights[0].IsImmune());
         }
 
-        void Present(string bossName, float ratio)
+        void Present(string bossName, float ratio, bool immune)
         {
             EnsureBar();
             if (!_hasSample || _bossName != bossName)
@@ -255,9 +255,15 @@ namespace Skopje.BossHealth
             if (_label != null)
                 _label.text = bossName;
             if (_healthImage != null)
+            {
+                _healthImage.color = immune ? BossBarStyle.ImmuneColor : BossBarStyle.HealthColor;
                 _healthImage.fillAmount = _health;
+            }
             if (_delayImage != null)
+            {
+                _delayImage.color = immune ? BossBarStyle.ImmuneDelayColor : BossBarStyle.DelayColor;
                 _delayImage.fillAmount = _delay;
+            }
         }
 
         void AnimateDelay()
@@ -443,9 +449,8 @@ namespace Skopje.BossHealth
         {
             XpProgressBar xpBar = FindXpBar();
             Image xpImage = xpBar != null ? xpBar.ProgressBar : null;
-            Sprite xpSprite = xpImage != null ? xpImage.sprite : null;
-            Sprite healthSprite = ResolveSprite(BossBarStyle.HealthSpriteName, xpSprite) ?? SolidSprite();
-            Sprite delaySprite = ResolveSprite(BossBarStyle.DelaySpriteName, healthSprite) ?? healthSprite;
+            Sprite healthSprite = ResolveSprite(BossBarStyle.HealthSpriteName, null) ?? SolidSprite();
+            Sprite delaySprite = ResolveSprite(BossBarStyle.DelaySpriteName, null) ?? healthSprite;
             Sprite backgroundSprite = ResolveSprite(BossBarStyle.BackgroundSpriteName, FrameSprite(xpImage, healthSprite));
 
             _barRoot = new GameObject("BossHealthBar");
@@ -846,6 +851,18 @@ namespace Skopje.BossHealth
             return obj != null;
         }
 
+        static bool SafeDamageable(MetalskyBoss boss)
+        {
+            try
+            {
+                return boss.IsDamageable;
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+        }
+
         static bool SafeDead(MetalskyBoss boss)
         {
             try
@@ -875,6 +892,7 @@ namespace Skopje.BossHealth
             public string Name;
 
             public abstract bool StillGoing(out float ratio);
+            public abstract bool IsImmune();
         }
 
         sealed class AnaFight : Fight
@@ -904,6 +922,11 @@ namespace Skopje.BossHealth
                     return false;
                 return TryRatio(_boss.EnemyControl, out ratio);
             }
+
+            public override bool IsImmune()
+            {
+                return !IsTrue(_boss.IsVulnerable);
+            }
         }
 
         sealed class VesnaFight : Fight
@@ -931,6 +954,11 @@ namespace Skopje.BossHealth
                     return false;
                 return TryRatio(_boss.EnemyControl, out ratio);
             }
+
+            public override bool IsImmune()
+            {
+                return !IsTrue(_boss.Visibility);
+            }
         }
 
         sealed class MetalskyFight : Fight
@@ -949,6 +977,11 @@ namespace Skopje.BossHealth
                 if (!IsAlive(_boss) || SafeDead(_boss) || !IsTrue(_boss.BossBattleState))
                     return false;
                 return TryRatio(_boss.PawnStatus, out ratio);
+            }
+
+            public override bool IsImmune()
+            {
+                return !SafeDamageable(_boss);
             }
         }
 
@@ -974,6 +1007,25 @@ namespace Skopje.BossHealth
                 if (control == null)
                     control = _brain.GetComponentInChildren<EnemyControlAStar>(true);
                 return TryRatio(control, out ratio);
+            }
+
+            public override bool IsImmune()
+            {
+                try
+                {
+                    if (_brain.blockHelper != null && _brain.blockHelper.IsBlocking)
+                        return true;
+
+                    TeofanBossState state = _brain.CurrentState;
+                    return state == TeofanBossState.DissolveIn
+                        || state == TeofanBossState.FallenInteract
+                        || state == TeofanBossState.EndPhase
+                        || state == TeofanBossState.Despawned;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
             }
         }
     }

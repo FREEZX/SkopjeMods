@@ -1,0 +1,12 @@
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\MinimapPlugin.csproj.AssemblyReference.cache
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\MinimapPlugin.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\MinimapPlugin.AssemblyInfoInputs.cache
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\MinimapPlugin.AssemblyInfo.cs
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\MinimapPlugin.csproj.CoreCompileInputs.cache
+c:\Users\andre\Desktop\SkopjeMods\Minimap\bin\Release\net6.0\Skopje.Minimap.deps.json
+c:\Users\andre\Desktop\SkopjeMods\Minimap\bin\Release\net6.0\Skopje.Minimap.dll
+c:\Users\andre\Desktop\SkopjeMods\Minimap\bin\Release\net6.0\Skopje.Minimap.pdb
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\Skopje.Minimap.dll
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\refint\Skopje.Minimap.dll
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\Skopje.Minimap.pdb
+c:\Users\andre\Desktop\SkopjeMods\Minimap\obj\Release\net6.0\ref\Skopje.Minimap.dll

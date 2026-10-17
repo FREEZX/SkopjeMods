@@ -25,6 +25,8 @@ namespace Skopje.DamageNumbers
         internal static ConfigEntry<bool> OnlyYourDamage;
         internal static ConfigEntry<float> Lifetime;
         internal static ConfigEntry<float> Size;
+        internal static ConfigEntry<float> ValueMultiplier;
+        internal static ConfigEntry<int> CritTextAbove;
 
         static Harmony _harmony;
         static SkopjePlayer _localPlayer;
@@ -51,6 +53,8 @@ namespace Skopje.DamageNumbers
             OnlyYourDamage = Config.Bind("Display", "OnlyYourDamage", true, "Only show hits dealt by your pawn. Hits with no owner still show.");
             Lifetime = Config.Bind("Display", "Lifetime", 0.8f, "Seconds each number stays on screen.");
             Size = Config.Bind("Display", "Size", 1f, "Size multiplier.");
+            ValueMultiplier = Config.Bind("Display", "ValueMultiplier", 1f, "Extra multiplier on the displayed number. The built-in scale stays in place.");
+            CritTextAbove = Config.Bind("Display", "CritTextAbove", 100, "Show the CRIT label when the displayed number is greater than this.");
 
             ClassInjector.RegisterTypeInIl2Cpp<DamageNumbersDisplay>();
 
@@ -181,8 +185,9 @@ namespace Skopje.DamageNumbers
                 part = enemy.lastDamagedPart.Value;
 
             bool crit = IsCrit(part);
-            int shown = ShownDamage(raw, crit);
-            DamageTier.Apply(shown, out Color color, out float tierScale);
+            float displayScale = DisplayScale(crit);
+            int shown = ShownDamage(raw, displayScale);
+            DamageTier.Apply(shown, displayScale, out Color color, out float tierScale);
             float punch = PunchFor(rawAmount, crit, type) * tierScale;
             pos += new Vector3(
                 UnityEngine.Random.Range(-0.22f, 0.22f),
@@ -280,11 +285,26 @@ namespace Skopje.DamageNumbers
 
         // Real hits in this game are often 1, 2, or 3. Scale them up so the popup
         // still tracks the hit, but reads like a chunky score. Crits are doubled.
-        static int ShownDamage(float raw, bool crit)
+        static float DisplayScale(bool crit)
         {
-            float scale = crit ? 200f : 100f;
+            float extra = 1f;
+            if (ValueMultiplier != null && !float.IsNaN(ValueMultiplier.Value) && !float.IsInfinity(ValueMultiplier.Value))
+                extra = ValueMultiplier.Value;
+            return (crit ? 200f : 100f) * extra;
+        }
+
+        static int ShownDamage(float raw, float displayScale)
+        {
             float roll = UnityEngine.Random.Range(0.94f, 1.06f);
-            return Mathf.Max(1, Mathf.RoundToInt(raw * scale * roll));
+            return Mathf.Max(1, Mathf.RoundToInt(raw * displayScale * roll));
+        }
+
+        internal static bool ShowCritText(int shown, bool crit)
+        {
+            if (!crit)
+                return false;
+            int above = CritTextAbove != null ? CritTextAbove.Value : 100;
+            return shown > above;
         }
 
         static bool Claim(EnemyControlAStar enemy, int amount, Vector3 pos)
@@ -416,7 +436,7 @@ namespace Skopje.DamageNumbers
                 Tilt = UnityEngine.Random.Range(crit ? -18f : -14f, crit ? 18f : 14f),
                 Amount = amount,
                 Color = color,
-                Text = crit ? "CRIT\n" + amount : amount.ToString()
+                Text = DamageNumbersPlugin.ShowCritText(amount, crit) ? "CRIT\n" + amount : amount.ToString()
             };
             Measure(display._numbers[slot].Text, out display._numbers[slot].Lines, out display._numbers[slot].Longest);
         }
@@ -607,9 +627,13 @@ namespace Skopje.DamageNumbers
         static readonly Color LightOrange = new Color(1f, 0.74f, 0.38f, 1f);
         static readonly Color Orange = new Color(1f, 0.48f, 0.08f, 1f);
 
-        public static void Apply(int amount, out Color color, out float sizeScale)
+        public static void Apply(int amount, float displayScale, out Color color, out float sizeScale)
         {
-            if (amount >= 50)
+            int yellow = Band(25, displayScale);
+            int lightOrange = Band(40, displayScale);
+            int orange = Band(50, displayScale);
+
+            if (amount >= orange)
             {
                 color = Orange;
                 sizeScale = 1.15f;
@@ -617,12 +641,17 @@ namespace Skopje.DamageNumbers
             }
 
             sizeScale = 1f;
-            if (amount >= 40)
+            if (amount >= lightOrange)
                 color = LightOrange;
-            else if (amount >= 25)
+            else if (amount >= yellow)
                 color = LightYellow;
             else
                 color = White;
+        }
+
+        static int Band(int baseValue, float displayScale)
+        {
+            return Mathf.Max(1, Mathf.RoundToInt(baseValue * displayScale));
         }
     }
 }

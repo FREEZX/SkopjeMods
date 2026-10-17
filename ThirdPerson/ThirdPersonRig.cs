@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Skopje.ThirdPerson
 {
@@ -13,7 +14,7 @@ namespace Skopje.ThirdPerson
 
         void LateUpdate()
         {
-            ThirdPersonRig.Apply(ThirdPersonRig.LocalCamera);
+            ThirdPersonRig.PrepareView();
         }
     }
 
@@ -22,10 +23,12 @@ namespace Skopje.ThirdPerson
         const float MoveThreshold = 0.2f;
         const float ExternalTurn = 35f;
 
-        static readonly List<Renderer> Hidden = new List<Renderer>();
+        static readonly List<Renderer> BodyRenderers = new List<Renderer>();
+        static readonly List<Renderer> ArmRenderers = new List<Renderer>();
+        static readonly List<Renderer> ShadowOnly = new List<Renderer>();
+        static readonly List<Collider> InteractColliders = new List<Collider>();
+        static readonly List<int> InteractLayers = new List<int>();
         static readonly RaycastHit[] Hits = new RaycastHit[24];
-
-        internal static SkopjeFPSCamera LocalCamera;
 
         static SkopjePlayer _player;
         static bool _holding;
@@ -33,21 +36,37 @@ namespace Skopje.ThirdPerson
         static Quaternion _facing;
         static Quaternion _incomingFacing;
         static bool _hasIncoming;
-        static bool _hasLook;
-        static Quaternion _look = Quaternion.identity;
-        static bool _hasPlacement;
-        static Vector3 _placedPos;
-        static float _baseFov;
         static float _boom = 2.7f;
         static float _ads;
         static bool _capturedIk;
         static bool _aimWasEnabled;
         static bool _lookWasEnabled;
-        static bool _followWasEnabled;
-        static bool _disabledFollow;
         static float _nextScan;
         static int _errors;
         static bool _logged;
+        static int _viewId;
+        static bool _hasView;
+        static Vector3 _viewPos;
+        static Quaternion _viewRot;
+        static float _viewFov;
+        static bool _pushed;
+        static Vector3 _savedPos;
+        static Quaternion _savedRot;
+        static float _savedFov;
+        static bool _maskSaved;
+        static int _savedMask;
+        static int _bodyLayers;
+        static GameObject _thirdRoot;
+        static Vector3 _thirdScale;
+        static bool _scaledThird;
+        static bool _control;
+        static IntPtr _controllerPtr;
+        static Camera _viewCamera;
+        static Vector3 _movePlanar;
+        static float _turnSharpness;
+        static int _interactMask = -1;
+        static bool _layersShifted;
+        static float _nextColliderScan;
 
         public static void OnClientStarted()
         {
@@ -57,7 +76,6 @@ namespace Skopje.ThirdPerson
         {
             Release();
             _player = null;
-            LocalCamera = null;
         }
 
         public static void OnPlayerStarted(SkopjePlayer player)
@@ -72,7 +90,6 @@ namespace Skopje.ThirdPerson
             {
                 Release();
                 _player = null;
-                LocalCamera = null;
             }
         }
 
@@ -80,12 +97,12 @@ namespace Skopje.ThirdPerson
         {
             Release();
             _player = null;
-            LocalCamera = null;
         }
 
         public static void TickBody()
         {
-            if (!CanControl(_player))
+            RefreshControl();
+            if (!_control)
             {
                 if (_holding)
                     Release();
@@ -94,7 +111,14 @@ namespace Skopje.ThirdPerson
 
             try
             {
-                HoldPresentation(_player);
+                CacheInteractMask();
+                if (Time.unscaledTime >= _nextColliderScan)
+                {
+                    _nextColliderScan = Time.unscaledTime + 0.5f;
+                    CacheInteractColliders();
+                }
+
+                Present(_player, null);
             }
             catch (Exception ex)
             {
@@ -102,32 +126,10 @@ namespace Skopje.ThirdPerson
             }
         }
 
-        public static void Apply(SkopjeFPSCamera fps)
-        {
-            if (fps == null || !CanControl(fps.Player))
-                return;
-
-            Camera cam = fps.mainCamera != null ? fps.mainCamera : Camera.main;
-            if (cam == null)
-                return;
-
-            LocalCamera = fps;
-            if (_player == null)
-                _player = fps.Player;
-
-            try
-            {
-                Place(fps, cam);
-            }
-            catch (Exception ex)
-            {
-                Fail(ex);
-            }
-        }
-
+        // UpdateRotation runs inside an IL2CPP call. Touching IsOwner from here re-enters the runtime and crashes the process.
         public static void RememberBody(SkopjeCharacterController controller, Quaternion currentRotation)
         {
-            if (!CanControl(controller != null ? controller.Player : null))
+            if (!_control || controller is null || controller.Pointer != _controllerPtr)
             {
                 _hasIncoming = false;
                 return;
@@ -139,25 +141,18 @@ namespace Skopje.ThirdPerson
 
         public static void HoldBodyFacing(SkopjeCharacterController controller, ref Quaternion currentRotation, float deltaTime)
         {
-            if (!_hasIncoming || controller == null || !CanControl(controller.Player))
+            if (!_hasIncoming || !_control || controller is null || controller.Pointer != _controllerPtr)
                 return;
 
             Quaternion held = _hasFacing ? _facing : _incomingFacing;
             if (!_hasFacing || Quaternion.Angle(held, _incomingFacing) > ExternalTurn)
                 held = _incomingFacing;
 
-            if (ThirdPersonPlugin.FaceMovement.Value)
+            if (ThirdPersonPlugin.FaceMovement.Value && _movePlanar.sqrMagnitude > MoveThreshold * MoveThreshold)
             {
-                Vector3 move = controller.moveInputVector;
-                move.y = 0f;
-                if (move.sqrMagnitude > MoveThreshold * MoveThreshold)
-                {
-                    float sharp = controller.OrientationSharpness;
-                    if (sharp < 0.01f)
-                        sharp = 12f;
-                    float blend = 1f - Mathf.Exp(-sharp * Mathf.Max(0f, deltaTime));
-                    held = Quaternion.Slerp(held, Quaternion.LookRotation(move.normalized, Vector3.up), blend);
-                }
+                float sharp = _turnSharpness > 0.01f ? _turnSharpness : 12f;
+                float blend = 1f - Mathf.Exp(-sharp * Mathf.Max(0f, deltaTime));
+                held = Quaternion.Slerp(held, Quaternion.LookRotation(_movePlanar.normalized, Vector3.up), blend);
             }
 
             _facing = FlatYaw(held);
@@ -165,68 +160,119 @@ namespace Skopje.ThirdPerson
             currentRotation = _facing;
         }
 
-        static void Place(SkopjeFPSCamera fps, Camera cam)
+        static void RefreshControl()
         {
-            Quaternion look = ReadLook(fps, cam);
-            _look = look;
-            _hasLook = true;
+            _control = false;
+            _controllerPtr = IntPtr.Zero;
+            if (!CanControl(_player))
+                return;
 
-            bool fresh = !_hasPlacement || (cam.transform.position - _placedPos).sqrMagnitude > 0.0004f;
-            if (fresh)
-                _baseFov = cam.fieldOfView;
+            SkopjeCharacterController body = _player.SkopjeCharacterController;
+            SkopjeFPSCamera camera = _player.SkopjeFPSCamera;
+            if (body is null || camera is null || body.Pointer == IntPtr.Zero || camera.Pointer == IntPtr.Zero)
+                return;
 
-            float adsTarget = fps.adsMode ? 1f : 0f;
-            _ads = Mathf.MoveTowards(_ads, adsTarget, Time.deltaTime / 0.12f);
+            _controllerPtr = body.Pointer;
+            _movePlanar = body.moveInputVector;
+            _movePlanar.y = 0f;
+            _turnSharpness = body.OrientationSharpness;
+            _control = true;
+        }
 
-            float distance = Mathf.Lerp(Clamp(ThirdPersonPlugin.Distance.Value, 0.8f, 8f), Clamp(ThirdPersonPlugin.AdsDistance.Value, 0.6f, 6f), _ads);
-            float shoulder = Mathf.Lerp(Clamp(ThirdPersonPlugin.Shoulder.Value, 0f, 2f), Clamp(ThirdPersonPlugin.AdsShoulder.Value, 0f, 1.5f), _ads);
-            float height = Clamp(ThirdPersonPlugin.Height.Value, -1f, 2f);
-            float boom = new Vector3(shoulder, height, -distance).magnitude;
-            if (!_hasPlacement)
-                _boom = boom;
-            _boom = Mathf.Lerp(_boom, boom, 1f - Mathf.Exp(-16f * Time.deltaTime));
-
-            Vector3 pivot = Pivot(fps.Player);
-            Vector3 offset = look * new Vector3(shoulder, height, -distance);
-            if (offset.sqrMagnitude < 0.0001f)
-                offset = look * Vector3.back;
-            Vector3 dir = offset.normalized;
-            float allowed = PullIn(fps.Player, pivot, dir, _boom);
-            Vector3 camPos = pivot + dir * allowed;
-
-            Vector3 aim = AimPoint(fps.Player, pivot, look * Vector3.forward);
-            Vector3 toAim = aim - camPos;
-            Vector3 up = look * Vector3.up;
-            if (toAim.sqrMagnitude < 0.0001f || Mathf.Abs(Vector3.Dot(toAim.normalized, up.normalized)) > 0.995f)
-                cam.transform.rotation = look;
-            else
-                cam.transform.rotation = Quaternion.LookRotation(toAim, up);
-
-            cam.transform.position = camPos;
-            cam.fieldOfView = _baseFov + Clamp(ThirdPersonPlugin.FovBonus.Value, 0f, 40f) * (1f - _ads);
-            _placedPos = camPos;
-            _hasPlacement = true;
-            KeepBodyYaw(fps.Player);
-
-            if (!_logged)
+        public static void PrepareView()
+        {
+            if (_pushed && _viewCamera != null)
             {
-                _logged = true;
-                ThirdPersonPlugin.LogSource.LogInfo("Right-shoulder camera is active. The body does not turn with the mouse.");
+                _viewCamera.transform.SetPositionAndRotation(_savedPos, _savedRot);
+                _viewCamera.fieldOfView = _savedFov;
+                _pushed = false;
+            }
+
+            _hasView = false;
+            _viewId = 0;
+            if (!_control || _player is null)
+                return;
+
+            SkopjeFPSCamera fps = _player.SkopjeFPSCamera;
+            if (fps is null)
+                return;
+
+            Camera cam = fps.mainCamera != null ? fps.mainCamera : Camera.main;
+            if (cam == null)
+                return;
+
+            try
+            {
+                // Offset from the live eye camera. Offset interiors move that camera, not the root position.
+                Quaternion look = ReadLook(fps, cam);
+                Vector3 eye = cam.transform.position;
+                float adsTarget = fps.adsMode ? 1f : 0f;
+                _ads = Mathf.MoveTowards(_ads, adsTarget, Time.deltaTime / 0.12f);
+
+                float distance = Mathf.Lerp(Clamp(ThirdPersonPlugin.Distance.Value, 0.8f, 8f), Clamp(ThirdPersonPlugin.AdsDistance.Value, 0.6f, 6f), _ads);
+                float shoulder = Mathf.Lerp(Clamp(ThirdPersonPlugin.Shoulder.Value, 0f, 2.5f), Clamp(ThirdPersonPlugin.AdsShoulder.Value, 0f, 2f), _ads);
+                float height = Clamp(ThirdPersonPlugin.Height.Value, -1f, 2f);
+                if (_boom <= 0.01f)
+                    _boom = distance;
+                _boom = Mathf.Lerp(_boom, distance, 1f - Mathf.Exp(-16f * Time.deltaTime));
+
+                Vector3 side = eye + look * new Vector3(shoulder, height, 0f);
+                Vector3 back = look * Vector3.back;
+                float allowed = PullIn(_player, side, back, _boom);
+                Vector3 camPos = side + back * allowed;
+                Vector3 aim = AimPoint(_player, eye, look * Vector3.forward);
+                Vector3 toAim = aim - camPos;
+                Vector3 up = look * Vector3.up;
+
+                _viewPos = camPos;
+                _viewFov = cam.fieldOfView + Clamp(ThirdPersonPlugin.FovBonus.Value, 0f, 40f) * (1f - _ads);
+                if (toAim.sqrMagnitude < 0.0001f || up.sqrMagnitude < 0.0001f || Mathf.Abs(Vector3.Dot(toAim.normalized, up.normalized)) > 0.995f)
+                    _viewRot = look;
+                else
+                    _viewRot = Quaternion.LookRotation(toAim, up);
+
+                _viewId = cam.GetInstanceID();
+                _viewCamera = cam;
+                _hasView = true;
+                Present(_player, cam);
+
+                if (!_logged)
+                {
+                    _logged = true;
+                    ThirdPersonPlugin.LogSource.LogInfo("Right-shoulder view is active. World streaming still uses the eye camera.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Fail(ex);
             }
         }
 
-        static void KeepBodyYaw(SkopjePlayer player)
+        // Render-only. The gameplay camera stays on the eyes so chunk streaming does not follow the shoulder.
+        public static void PushView(Camera camera)
         {
-            if (!_hasFacing || player == null)
+            if (!_hasView || camera == null || camera.GetInstanceID() != _viewId || _pushed)
                 return;
 
-            Transform body = player.transform;
-            Vector3 up = body.up;
-            Vector3 forward = Vector3.ProjectOnPlane(_facing * Vector3.forward, up);
-            if (forward.sqrMagnitude < 0.0001f)
+            _savedPos = camera.transform.position;
+            _savedRot = camera.transform.rotation;
+            _savedFov = camera.fieldOfView;
+            camera.transform.SetPositionAndRotation(_viewPos, _viewRot);
+            camera.fieldOfView = _viewFov;
+            if (_maskSaved)
+                camera.cullingMask |= _bodyLayers;
+            RevealCached();
+            _pushed = true;
+        }
+
+        public static void PopView(Camera camera)
+        {
+            if (!_pushed || camera == null || camera.GetInstanceID() != _viewId)
                 return;
 
-            body.rotation = Quaternion.LookRotation(forward.normalized, up);
+            camera.transform.SetPositionAndRotation(_savedPos, _savedRot);
+            camera.fieldOfView = _savedFov;
+            _pushed = false;
         }
 
         static Quaternion ReadLook(SkopjeFPSCamera fps, Camera cam)
@@ -235,8 +281,6 @@ namespace Skopje.ThirdPerson
                 return fps.VCamera.transform.rotation;
             if (fps.SocketTransform != null && fps.SocketTransform != cam.transform)
                 return fps.SocketTransform.rotation;
-            if (_hasLook && _hasPlacement && (cam.transform.position - _placedPos).sqrMagnitude < 0.0004f)
-                return _look;
             return cam.transform.rotation;
         }
 
@@ -296,15 +340,24 @@ namespace Skopje.ThirdPerson
             return best;
         }
 
-        static void HoldPresentation(SkopjePlayer player)
+        static void Present(SkopjePlayer player, Camera cam)
         {
             GameObject third = player.ThirdPerson;
-            if (third != null && !third.activeSelf)
-                third.SetActive(true);
+            if (third != null)
+            {
+                if (!third.activeSelf)
+                    third.SetActive(true);
+                if (!_scaledThird && third.transform.localScale.sqrMagnitude < 0.0001f)
+                {
+                    _thirdScale = third.transform.localScale;
+                    third.transform.localScale = Vector3.one;
+                    _scaledThird = true;
+                    _thirdRoot = third;
+                }
+            }
 
-            GameObject pack = player.ThirdPersonBackpackParent;
-            if (pack != null && !pack.activeSelf)
-                pack.SetActive(true);
+            if (player.ThirdPersonBackpackParent != null && !player.ThirdPersonBackpackParent.activeSelf)
+                player.ThirdPersonBackpackParent.SetActive(true);
 
             var anim = player.TPAnimationController;
             if (anim != null)
@@ -322,56 +375,69 @@ namespace Skopje.ThirdPerson
                     anim.LookAtMotor.enabled = false;
             }
 
-            var follow = player.ThirdPersonFollowCam;
-            if (follow != null && follow.Look != null && follow.Look.enabled)
-            {
-                _followWasEnabled = true;
-                follow.Look.enabled = false;
-                _disabledFollow = true;
-            }
-
             if (Time.unscaledTime >= _nextScan)
             {
                 _nextScan = Time.unscaledTime + 0.25f;
-                RebuildHidden(player);
+                CacheVisuals(player);
             }
 
-            for (int i = 0; i < Hidden.Count; i++)
-            {
-                if (Hidden[i] != null)
-                    Hidden[i].forceRenderingOff = true;
-            }
+            RevealCached();
+            if (cam != null)
+                IncludeBodyLayers(cam);
 
             _holding = true;
         }
 
-        static void RebuildHidden(SkopjePlayer player)
+        static void CacheVisuals(SkopjePlayer player)
         {
-            var next = new List<Renderer>();
+            RestoreArms();
+            BodyRenderers.Clear();
+            ArmRenderers.Clear();
+            _bodyLayers = 0;
+
             Transform third = player.ThirdPerson != null ? player.ThirdPerson.transform : null;
-            Collect(player.FirstPerson, third, next);
-
-            var weapons = player.WeaponsController;
-            if (weapons != null)
+            if (player.ThirdPersonRenderer != null)
+                AddBody(player.ThirdPersonRenderer);
+            if (third != null)
             {
-                if (weapons.Socket != null)
-                    Collect(weapons.Socket.gameObject, third, next);
-                if (weapons.ThrowSocket != null)
-                    Collect(weapons.ThrowSocket.gameObject, third, next);
+                Renderer[] found = third.GetComponentsInChildren<Renderer>(true);
+                for (int i = 0; i < found.Length; i++)
+                    AddBody(found[i]);
             }
 
-            for (int i = 0; i < Hidden.Count; i++)
+            if (player.SkopjeCharacterController != null && player.SkopjeCharacterController.MeshRoot != null)
             {
-                Renderer old = Hidden[i];
-                if (old != null && !next.Contains(old))
-                    old.forceRenderingOff = false;
+                Renderer[] found = player.SkopjeCharacterController.MeshRoot.GetComponentsInChildren<Renderer>(true);
+                for (int i = 0; i < found.Length; i++)
+                {
+                    Renderer renderer = found[i];
+                    if (renderer == null)
+                        continue;
+                    if (third != null && (renderer.transform == third || renderer.transform.IsChildOf(third)))
+                        AddBody(renderer);
+                    else if (player.FirstPerson == null || !renderer.transform.IsChildOf(player.FirstPerson.transform))
+                        AddBody(renderer);
+                }
             }
 
-            Hidden.Clear();
-            Hidden.AddRange(next);
+            CollectArms(player.FirstPerson, third);
         }
 
-        static void Collect(GameObject root, Transform thirdPerson, List<Renderer> into)
+        static void AddBody(Renderer renderer)
+        {
+            if (renderer == null || BodyRenderers.Contains(renderer))
+                return;
+
+            BodyRenderers.Add(renderer);
+            _bodyLayers |= 1 << renderer.gameObject.layer;
+            if (renderer.shadowCastingMode == ShadowCastingMode.ShadowsOnly && !ShadowOnly.Contains(renderer))
+            {
+                ShadowOnly.Add(renderer);
+                renderer.shadowCastingMode = ShadowCastingMode.On;
+            }
+        }
+
+        static void CollectArms(GameObject root, Transform thirdPerson)
         {
             if (root == null)
                 return;
@@ -382,24 +448,181 @@ namespace Skopje.ThirdPerson
             for (int i = 0; i < found.Length; i++)
             {
                 Renderer renderer = found[i];
-                if (renderer == null)
+                if (renderer == null || BodyRenderers.Contains(renderer) || ArmRenderers.Contains(renderer))
                     continue;
                 if (thirdPerson != null && renderer.transform.IsChildOf(thirdPerson))
                     continue;
-                if (!into.Contains(renderer))
-                    into.Add(renderer);
+                ArmRenderers.Add(renderer);
+            }
+        }
+
+        static void RevealCached()
+        {
+            if (_thirdRoot != null && !_thirdRoot.activeSelf)
+                _thirdRoot.SetActive(true);
+
+            for (int i = 0; i < BodyRenderers.Count; i++)
+            {
+                Renderer renderer = BodyRenderers[i];
+                if (renderer == null)
+                    continue;
+                renderer.forceRenderingOff = false;
+                renderer.enabled = true;
+                if (renderer is SkinnedMeshRenderer skin)
+                    skin.updateWhenOffscreen = true;
+            }
+
+            for (int i = 0; i < ArmRenderers.Count; i++)
+            {
+                if (ArmRenderers[i] != null)
+                    ArmRenderers[i].forceRenderingOff = true;
+            }
+        }
+
+        static void IncludeBodyLayers(Camera cam)
+        {
+            if (_bodyLayers == 0)
+                return;
+            if (!_maskSaved)
+            {
+                _savedMask = cam.cullingMask;
+                _maskSaved = true;
+            }
+
+            cam.cullingMask |= _bodyLayers;
+        }
+
+        public static void HideBodiesFromInteract()
+        {
+            RestoreInteractLayers();
+            if (_interactMask == 0 || InteractColliders.Count == 0)
+                return;
+
+            int free = 2;
+            if ((_interactMask & (1 << free)) != 0)
+            {
+                free = -1;
+                for (int layer = 8; layer < 32; layer++)
+                {
+                    if ((_interactMask & (1 << layer)) == 0)
+                    {
+                        free = layer;
+                        break;
+                    }
+                }
+            }
+
+            if (free < 0)
+                return;
+
+            for (int i = 0; i < InteractColliders.Count; i++)
+            {
+                Collider collider = InteractColliders[i];
+                if (collider == null)
+                {
+                    InteractLayers.Add(0);
+                    continue;
+                }
+
+                int layer = collider.gameObject.layer;
+                InteractLayers.Add(layer);
+                if ((_interactMask & (1 << layer)) != 0)
+                    collider.gameObject.layer = free;
+            }
+
+            _layersShifted = true;
+        }
+
+        public static void RestoreInteractLayers()
+        {
+            if (!_layersShifted)
+                return;
+
+            for (int i = InteractColliders.Count - 1; i >= 0; i--)
+            {
+                Collider collider = InteractColliders[i];
+                if (collider != null && i < InteractLayers.Count)
+                    collider.gameObject.layer = InteractLayers[i];
+            }
+
+            InteractLayers.Clear();
+            _layersShifted = false;
+        }
+
+        static void CacheInteractMask()
+        {
+            InteractController interact = _player.InteractController;
+            if (interact == null)
+            {
+                _interactMask = 0;
+                return;
+            }
+
+            _interactMask = interact.BlockingLayers.value | interact.InteractLayers.value;
+        }
+
+        static void CacheInteractColliders()
+        {
+            if (_layersShifted)
+                return;
+
+            InteractColliders.Clear();
+            SkopjePlayer[] players = UnityEngine.Object.FindObjectsOfType<SkopjePlayer>();
+            for (int i = 0; i < players.Length; i++)
+                AddPlayerColliders(players[i]);
+        }
+
+        static void AddPlayerColliders(SkopjePlayer player)
+        {
+            if (player == null || player.ThirdPerson == null)
+                return;
+
+            Collider owner = player.OwnerCollider;
+            Collider[] found = player.ThirdPerson.GetComponentsInChildren<Collider>(true);
+            for (int i = 0; i < found.Length; i++)
+            {
+                Collider collider = found[i];
+                if (collider == null || collider.isTrigger || collider == owner || InteractColliders.Contains(collider))
+                    continue;
+                InteractColliders.Add(collider);
+            }
+        }
+
+        static void RestoreArms()
+        {
+            for (int i = 0; i < ArmRenderers.Count; i++)
+            {
+                if (ArmRenderers[i] != null)
+                    ArmRenderers[i].forceRenderingOff = false;
             }
         }
 
         static void Release()
         {
-            for (int i = 0; i < Hidden.Count; i++)
+            if (_pushed && _viewCamera != null)
             {
-                if (Hidden[i] != null)
-                    Hidden[i].forceRenderingOff = false;
+                _viewCamera.transform.SetPositionAndRotation(_savedPos, _savedRot);
+                _viewCamera.fieldOfView = _savedFov;
             }
 
-            Hidden.Clear();
+            if (_maskSaved && _viewCamera != null)
+                _viewCamera.cullingMask = _savedMask;
+
+            for (int i = 0; i < ShadowOnly.Count; i++)
+            {
+                if (ShadowOnly[i] != null)
+                    ShadowOnly[i].shadowCastingMode = ShadowCastingMode.ShadowsOnly;
+            }
+
+            if (_scaledThird && _thirdRoot != null)
+                _thirdRoot.transform.localScale = _thirdScale;
+
+            RestoreInteractLayers();
+            InteractColliders.Clear();
+            RestoreArms();
+            BodyRenderers.Clear();
+            ArmRenderers.Clear();
+            ShadowOnly.Clear();
 
             if (_player != null)
             {
@@ -412,9 +635,6 @@ namespace Skopje.ThirdPerson
                         anim.LookAtMotor.enabled = _lookWasEnabled;
                 }
 
-                if (_disabledFollow && _player.ThirdPersonFollowCam != null && _player.ThirdPersonFollowCam.Look != null)
-                    _player.ThirdPersonFollowCam.Look.enabled = _followWasEnabled;
-
                 try
                 {
                     _player.RefreshActiveModels();
@@ -426,14 +646,20 @@ namespace Skopje.ThirdPerson
             }
 
             _capturedIk = false;
-            _disabledFollow = false;
             _holding = false;
             _hasFacing = false;
             _hasIncoming = false;
-            _hasPlacement = false;
-            _hasLook = false;
             _ads = 0f;
             _logged = false;
+            _control = false;
+            _controllerPtr = IntPtr.Zero;
+            _hasView = false;
+            _pushed = false;
+            _maskSaved = false;
+            _scaledThird = false;
+            _thirdRoot = null;
+            _viewCamera = null;
+            _bodyLayers = 0;
         }
 
         static bool CanControl(SkopjePlayer player)

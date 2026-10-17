@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Skopje.ThirdPerson")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f4f8bf5235790c04718d7ca24b0f3f76e93b270")]
 [assembly: System.Reflection.AssemblyProductAttribute("Skopje.ThirdPerson")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Skopje.ThirdPerson")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

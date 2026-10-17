@@ -4,12 +4,12 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
-using Cinemachine;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
 using Skopje.Modding;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Skopje.ThirdPerson
 {
@@ -18,7 +18,7 @@ namespace Skopje.ThirdPerson
     {
         public const string PluginGuid = "com.skopje.thirdperson";
         public const string PluginName = "Skopje Third Person";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.2.0";
 
         internal static ManualLogSource LogSource;
 
@@ -46,12 +46,12 @@ namespace Skopje.ThirdPerson
             LogSource = Log;
             Enabled = Config.Bind("Camera", "Enabled", true, "Over-the-shoulder camera on the right. The body keeps its own facing so the camera can orbit around to the face.");
             FaceMovement = Config.Bind("Camera", "FaceMovement", false, "Turn the body toward the direction you move. Leave this off to keep the body still while the camera orbits.");
-            Distance = Config.Bind("Camera", "Distance", 2.7f, "Meters behind the aim axis.");
-            Shoulder = Config.Bind("Camera", "Shoulder", 0.62f, "Meters to the right of the aim axis.");
-            Height = Config.Bind("Camera", "Height", 0.22f, "Meters above the pivot.");
-            PivotHeight = Config.Bind("Camera", "PivotHeight", 1.25f, "Orbit height above the feet, before crouch.");
-            AdsDistance = Config.Bind("Camera", "AdsDistance", 1.55f, "Distance while aiming down sights.");
-            AdsShoulder = Config.Bind("Camera", "AdsShoulder", 0.4f, "Right offset while aiming down sights.");
+            Distance = Config.Bind("Camera", "Distance", 3.6f, "Meters behind the eyes.");
+            Shoulder = Config.Bind("Camera", "Shoulder", 1.05f, "Meters to the right of the eyes. Kept even when a wall shortens the boom.");
+            Height = Config.Bind("Camera", "Height", 0.4f, "Meters above the eyes.");
+            PivotHeight = Config.Bind("Camera", "PivotHeight", 1.25f, "Unused. The view is offset from the eye camera so interiors stay aligned.");
+            AdsDistance = Config.Bind("Camera", "AdsDistance", 2.1f, "Distance while aiming down sights.");
+            AdsShoulder = Config.Bind("Camera", "AdsShoulder", 0.75f, "Right offset while aiming down sights.");
             FovBonus = Config.Bind("Camera", "FovBonus", 8f, "Extra field of view. Drops to zero while aiming.");
             AimDistance = Config.Bind("Camera", "AimDistance", 80f, "Crosshair trace length when nothing is under the reticle.");
 
@@ -73,9 +73,11 @@ namespace Skopje.ThirdPerson
             _driverHost.AddComponent<ThirdPersonDriver>();
 
             _harmony = new Harmony(PluginGuid);
-            Patch(AccessTools.Method(typeof(SkopjeFPSCamera), "LateUpdate"), nameof(ThirdPersonPatches.AfterCamera));
-            Patch(AccessTools.Method(typeof(CinemachineBrain), "LateUpdate"), nameof(ThirdPersonPatches.AfterBrain));
+            Patch(AccessTools.Method(typeof(RenderPipelineManager), "BeginCameraRendering"), nameof(ThirdPersonPatches.AfterBeginCamera));
+            Patch(AccessTools.Method(typeof(RenderPipelineManager), "EndCameraRendering"), nameof(ThirdPersonPatches.AfterEndCamera));
             Patch(AccessTools.Method(typeof(SkopjeCharacterController), "UpdateRotation"), nameof(ThirdPersonPatches.AfterBodyRotation), nameof(ThirdPersonPatches.BeforeBodyRotation));
+            PatchInteract(AccessTools.Method(typeof(InteractController), "Update"));
+            PatchInteract(AccessTools.Method(typeof(InteractController), "LateUpdate"));
 
             LogSource.LogInfo($"{PluginName} {PluginVersion} loaded. Config: {Config.ConfigFilePath}");
         }
@@ -92,6 +94,21 @@ namespace Skopje.ThirdPerson
             }
 
             return true;
+        }
+
+        static void PatchInteract(MethodInfo method)
+        {
+            if (method == null)
+            {
+                LogSource.LogWarning("Third person hook was not found: InteractController");
+                return;
+            }
+
+            _harmony.Patch(
+                method,
+                prefix: new HarmonyMethod(typeof(ThirdPersonPatches), nameof(ThirdPersonPatches.BeforeInteract)),
+                postfix: new HarmonyMethod(typeof(ThirdPersonPatches), nameof(ThirdPersonPatches.AfterInteract)),
+                finalizer: new HarmonyMethod(typeof(ThirdPersonPatches), nameof(ThirdPersonPatches.RestoreInteract)));
         }
 
         static void Patch(MethodInfo method, string postfix, string prefix = null)
@@ -121,14 +138,14 @@ namespace Skopje.ThirdPerson
 
     public static class ThirdPersonPatches
     {
-        public static void AfterCamera(SkopjeFPSCamera __instance)
+        public static void AfterBeginCamera(ScriptableRenderContext context, Camera camera)
         {
-            ThirdPersonRig.Apply(__instance);
+            ThirdPersonRig.PushView(camera);
         }
 
-        public static void AfterBrain()
+        public static void AfterEndCamera(ScriptableRenderContext context, Camera camera)
         {
-            ThirdPersonRig.Apply(ThirdPersonRig.LocalCamera);
+            ThirdPersonRig.PopView(camera);
         }
 
         public static void BeforeBodyRotation(SkopjeCharacterController __instance, ref Quaternion currentRotation)
@@ -140,6 +157,22 @@ namespace Skopje.ThirdPerson
         public static void AfterBodyRotation(SkopjeCharacterController __instance, ref Quaternion currentRotation, float deltaTime)
         {
             ThirdPersonRig.HoldBodyFacing(__instance, ref currentRotation, deltaTime);
+        }
+
+        public static void BeforeInteract()
+        {
+            ThirdPersonRig.HideBodiesFromInteract();
+        }
+
+        public static void AfterInteract()
+        {
+            ThirdPersonRig.RestoreInteractLayers();
+        }
+
+        public static Exception RestoreInteract(Exception __exception)
+        {
+            ThirdPersonRig.RestoreInteractLayers();
+            return __exception;
         }
     }
 }
