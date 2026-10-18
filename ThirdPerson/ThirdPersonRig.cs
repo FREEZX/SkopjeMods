@@ -27,7 +27,6 @@ namespace Skopje.ThirdPerson
         static readonly List<Renderer> ArmRenderers = new List<Renderer>();
         static readonly List<Renderer> ShadowOnly = new List<Renderer>();
         static readonly List<Collider> InteractColliders = new List<Collider>();
-        static readonly List<int> InteractLayers = new List<int>();
         static readonly RaycastHit[] Hits = new RaycastHit[24];
 
         static SkopjePlayer _player;
@@ -64,8 +63,6 @@ namespace Skopje.ThirdPerson
         static Camera _viewCamera;
         static Vector3 _movePlanar;
         static float _turnSharpness;
-        static int _interactMask = -1;
-        static bool _layersShifted;
         static float _nextColliderScan;
 
         public static void OnClientStarted()
@@ -111,11 +108,10 @@ namespace Skopje.ThirdPerson
 
             try
             {
-                CacheInteractMask();
                 if (Time.unscaledTime >= _nextColliderScan)
                 {
                     _nextColliderScan = Time.unscaledTime + 0.5f;
-                    CacheInteractColliders();
+                    SilenceBodyColliders();
                 }
 
                 Present(_player, null);
@@ -492,100 +488,35 @@ namespace Skopje.ThirdPerson
             cam.cullingMask |= _bodyLayers;
         }
 
-        public static void HideBodiesFromInteract()
+        static void SilenceBodyColliders()
         {
-            RestoreInteractLayers();
-            if (_interactMask == 0 || InteractColliders.Count == 0)
+            if (_player == null || _player.ThirdPerson == null)
                 return;
 
-            int free = 2;
-            if ((_interactMask & (1 << free)) != 0)
-            {
-                free = -1;
-                for (int layer = 8; layer < 32; layer++)
-                {
-                    if ((_interactMask & (1 << layer)) == 0)
-                    {
-                        free = layer;
-                        break;
-                    }
-                }
-            }
-
-            if (free < 0)
-                return;
-
-            for (int i = 0; i < InteractColliders.Count; i++)
-            {
-                Collider collider = InteractColliders[i];
-                if (collider == null)
-                {
-                    InteractLayers.Add(0);
-                    continue;
-                }
-
-                int layer = collider.gameObject.layer;
-                InteractLayers.Add(layer);
-                if ((_interactMask & (1 << layer)) != 0)
-                    collider.gameObject.layer = free;
-            }
-
-            _layersShifted = true;
-        }
-
-        public static void RestoreInteractLayers()
-        {
-            if (!_layersShifted)
-                return;
-
-            for (int i = InteractColliders.Count - 1; i >= 0; i--)
-            {
-                Collider collider = InteractColliders[i];
-                if (collider != null && i < InteractLayers.Count)
-                    collider.gameObject.layer = InteractLayers[i];
-            }
-
-            InteractLayers.Clear();
-            _layersShifted = false;
-        }
-
-        static void CacheInteractMask()
-        {
-            InteractController interact = _player.InteractController;
-            if (interact == null)
-            {
-                _interactMask = 0;
-                return;
-            }
-
-            _interactMask = interact.BlockingLayers.value | interact.InteractLayers.value;
-        }
-
-        static void CacheInteractColliders()
-        {
-            if (_layersShifted)
-                return;
-
-            InteractColliders.Clear();
-            SkopjePlayer[] players = UnityEngine.Object.FindObjectsOfType<SkopjePlayer>();
-            for (int i = 0; i < players.Length; i++)
-                AddPlayerColliders(players[i]);
-        }
-
-        static void AddPlayerColliders(SkopjePlayer player)
-        {
-            if (player == null || player.ThirdPerson == null)
-                return;
-
-            Collider owner = player.OwnerCollider;
-            Collider[] found = player.ThirdPerson.GetComponentsInChildren<Collider>(true);
+            Collider owner = _player.OwnerCollider;
+            Collider[] found = _player.ThirdPerson.GetComponentsInChildren<Collider>(true);
             for (int i = 0; i < found.Length; i++)
             {
                 Collider collider = found[i];
-                if (collider == null || collider.isTrigger || collider == owner || InteractColliders.Contains(collider))
+                if (collider == null || collider.isTrigger || collider == owner || !collider.enabled)
                     continue;
+                if (InteractColliders.Contains(collider))
+                    continue;
+
+                collider.enabled = false;
                 InteractColliders.Add(collider);
             }
+        }
+
+        static void RestoreBodyColliders()
+        {
+            for (int i = 0; i < InteractColliders.Count; i++)
+            {
+                if (InteractColliders[i] != null)
+                    InteractColliders[i].enabled = true;
+            }
+
+            InteractColliders.Clear();
         }
 
         static void RestoreArms()
@@ -617,8 +548,7 @@ namespace Skopje.ThirdPerson
             if (_scaledThird && _thirdRoot != null)
                 _thirdRoot.transform.localScale = _thirdScale;
 
-            RestoreInteractLayers();
-            InteractColliders.Clear();
+            RestoreBodyColliders();
             RestoreArms();
             BodyRenderers.Clear();
             ArmRenderers.Clear();

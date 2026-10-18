@@ -218,8 +218,6 @@ namespace Skopje.DamageNumbers
         static PawnStatus LocalPawn()
         {
             if (_localPlayer == null)
-                _localPlayer = FindLocalPlayer();
-            if (_localPlayer == null)
                 return null;
 
             try
@@ -231,22 +229,6 @@ namespace Skopje.DamageNumbers
                 _localPlayer = null;
                 return null;
             }
-        }
-
-        static SkopjePlayer FindLocalPlayer()
-        {
-            var players = UnityEngine.Object.FindObjectsOfType<SkopjePlayer>();
-            if (players == null)
-                return null;
-
-            for (int i = 0; i < players.Length; i++)
-            {
-                SkopjePlayer player = players[i];
-                if (player != null && player.IsOwner)
-                    return player;
-            }
-
-            return null;
         }
 
         static Vector3 HitPosition(EnemyControlAStar enemy, HitData hit)

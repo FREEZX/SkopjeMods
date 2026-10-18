@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\DomRadioPlugin.csproj": {}
+    "C:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\DomRadioPlugin.csproj": {}
   },
   "projects": {
-    "c:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\DomRadioPlugin.csproj": {
+    "C:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\DomRadioPlugin.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\DomRadioPlugin.csproj",
+        "projectUniqueName": "C:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\DomRadioPlugin.csproj",
         "projectName": "Skopje.DomRadio",
-        "projectPath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\DomRadioPlugin.csproj",
+        "projectPath": "C:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\DomRadioPlugin.csproj",
         "packagesPath": "C:\\Users\\andre\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a0404811fc6e51c4c5761fd11591789f\\nuget",
-        "outputPath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\obj\\",
+        "outputPath": "C:\\Users\\andre\\Desktop\\SkopjeMods\\DomRadio\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\andre\\AppData\\Roaming\\NuGet\\NuGet.Config",

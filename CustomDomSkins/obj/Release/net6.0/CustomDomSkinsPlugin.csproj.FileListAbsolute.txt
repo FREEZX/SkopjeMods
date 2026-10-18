@@ -1,0 +1,14 @@
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\bin\Release\net6.0\DomSkins\multiplayer.png
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\bin\Release\net6.0\DomSkins\singleplayer.png
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\bin\Release\net6.0\Skopje.CustomDomSkins.deps.json
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\bin\Release\net6.0\Skopje.CustomDomSkins.dll
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\bin\Release\net6.0\Skopje.CustomDomSkins.pdb
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\CustomDomSkinsPlugin.csproj.AssemblyReference.cache
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\CustomDomSkinsPlugin.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\CustomDomSkinsPlugin.AssemblyInfoInputs.cache
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\CustomDomSkinsPlugin.AssemblyInfo.cs
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\CustomDomSkinsPlugin.csproj.CoreCompileInputs.cache
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\Skopje.CustomDomSkins.dll
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\refint\Skopje.CustomDomSkins.dll
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\Skopje.CustomDomSkins.pdb
+C:\Users\andre\Desktop\SkopjeMods\CustomDomSkins\obj\Release\net6.0\ref\Skopje.CustomDomSkins.dll

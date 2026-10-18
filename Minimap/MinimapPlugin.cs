@@ -110,36 +110,7 @@ namespace Skopje.Minimap
 
         internal static SkopjePlayer FindLocalPlayer()
         {
-            if (LocalPlayer != null)
-                return LocalPlayer;
-
-            var players = UnityEngine.Object.FindObjectsOfType<SkopjePlayer>();
-            if (players == null)
-                return null;
-
-            SkopjePlayer solo = null;
-            int count = 0;
-            for (int i = 0; i < players.Length; i++)
-            {
-                SkopjePlayer player = players[i];
-                if (player == null)
-                    continue;
-                count++;
-                solo = player;
-                if (player.IsOwner)
-                {
-                    LocalPlayer = player;
-                    return player;
-                }
-            }
-
-            if (count == 1)
-            {
-                LocalPlayer = solo;
-                return solo;
-            }
-
-            return null;
+            return LocalPlayer;
         }
 
         static Il2CppSystem.Action ToIl2Cpp(System.Action action)
@@ -236,6 +207,13 @@ namespace Skopje.Minimap
             }
 
             if (!MinimapPlugin.Enabled.Value)
+            {
+                if (_root != null)
+                    _root.gameObject.SetActive(false);
+                return;
+            }
+
+            if (MinimapPlugin.LocalPlayer == null)
             {
                 if (_root != null)
                     _root.gameObject.SetActive(false);

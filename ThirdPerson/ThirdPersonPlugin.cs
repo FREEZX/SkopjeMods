@@ -18,7 +18,7 @@ namespace Skopje.ThirdPerson
     {
         public const string PluginGuid = "com.skopje.thirdperson";
         public const string PluginName = "Skopje Third Person";
-        public const string PluginVersion = "1.2.0";
+        public const string PluginVersion = "1.3.0";
 
         internal static ManualLogSource LogSource;
 
@@ -76,8 +76,6 @@ namespace Skopje.ThirdPerson
             Patch(AccessTools.Method(typeof(RenderPipelineManager), "BeginCameraRendering"), nameof(ThirdPersonPatches.AfterBeginCamera));
             Patch(AccessTools.Method(typeof(RenderPipelineManager), "EndCameraRendering"), nameof(ThirdPersonPatches.AfterEndCamera));
             Patch(AccessTools.Method(typeof(SkopjeCharacterController), "UpdateRotation"), nameof(ThirdPersonPatches.AfterBodyRotation), nameof(ThirdPersonPatches.BeforeBodyRotation));
-            PatchInteract(AccessTools.Method(typeof(InteractController), "Update"));
-            PatchInteract(AccessTools.Method(typeof(InteractController), "LateUpdate"));
 
             LogSource.LogInfo($"{PluginName} {PluginVersion} loaded. Config: {Config.ConfigFilePath}");
         }
@@ -94,21 +92,6 @@ namespace Skopje.ThirdPerson
             }
 
             return true;
-        }
-
-        static void PatchInteract(MethodInfo method)
-        {
-            if (method == null)
-            {
-                LogSource.LogWarning("Third person hook was not found: InteractController");
-                return;
-            }
-
-            _harmony.Patch(
-                method,
-                prefix: new HarmonyMethod(typeof(ThirdPersonPatches), nameof(ThirdPersonPatches.BeforeInteract)),
-                postfix: new HarmonyMethod(typeof(ThirdPersonPatches), nameof(ThirdPersonPatches.AfterInteract)),
-                finalizer: new HarmonyMethod(typeof(ThirdPersonPatches), nameof(ThirdPersonPatches.RestoreInteract)));
         }
 
         static void Patch(MethodInfo method, string postfix, string prefix = null)
@@ -159,20 +142,5 @@ namespace Skopje.ThirdPerson
             ThirdPersonRig.HoldBodyFacing(__instance, ref currentRotation, deltaTime);
         }
 
-        public static void BeforeInteract()
-        {
-            ThirdPersonRig.HideBodiesFromInteract();
-        }
-
-        public static void AfterInteract()
-        {
-            ThirdPersonRig.RestoreInteractLayers();
-        }
-
-        public static Exception RestoreInteract(Exception __exception)
-        {
-            ThirdPersonRig.RestoreInteractLayers();
-            return __exception;
-        }
     }
 }

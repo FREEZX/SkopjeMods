@@ -1,0 +1,12 @@
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\bin\Debug\net6.0\PeePeeMod.deps.json
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\bin\Debug\net6.0\PeePeeMod.dll
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\bin\Debug\net6.0\PeePeeMod.pdb
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\PeePeeMod.csproj.AssemblyReference.cache
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\PeePeeMod.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\PeePeeMod.AssemblyInfoInputs.cache
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\PeePeeMod.AssemblyInfo.cs
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\PeePeeMod.csproj.CoreCompileInputs.cache
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\PeePeeMod.dll
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\refint\PeePeeMod.dll
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\PeePeeMod.pdb
+C:\Users\andre\Desktop\SkopjeMods\PeePeeMod\obj\Debug\net6.0\ref\PeePeeMod.dll

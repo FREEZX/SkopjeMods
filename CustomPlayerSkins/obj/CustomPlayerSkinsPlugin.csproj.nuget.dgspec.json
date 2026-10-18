@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\CustomPlayerSkinsPlugin.csproj": {}
+    "C:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\CustomPlayerSkinsPlugin.csproj": {}
   },
   "projects": {
-    "c:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\CustomPlayerSkinsPlugin.csproj": {
+    "C:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\CustomPlayerSkinsPlugin.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\CustomPlayerSkinsPlugin.csproj",
+        "projectUniqueName": "C:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\CustomPlayerSkinsPlugin.csproj",
         "projectName": "Skopje.CustomPlayerSkins",
-        "projectPath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\CustomPlayerSkinsPlugin.csproj",
+        "projectPath": "C:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\CustomPlayerSkinsPlugin.csproj",
         "packagesPath": "C:\\Users\\andre\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a0404811fc6e51c4c5761fd11591789f\\nuget",
-        "outputPath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\obj\\",
+        "outputPath": "C:\\Users\\andre\\Desktop\\SkopjeMods\\CustomPlayerSkins\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\andre\\AppData\\Roaming\\NuGet\\NuGet.Config",

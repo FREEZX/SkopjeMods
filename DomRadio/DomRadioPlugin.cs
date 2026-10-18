@@ -118,24 +118,7 @@ namespace Skopje.DomRadio
 
         internal static SkopjePlayer FindLocalPlayer()
         {
-            if (LocalPlayer != null)
-                return LocalPlayer;
-
-            var players = UnityEngine.Object.FindObjectsOfType<SkopjePlayer>();
-            if (players == null)
-                return null;
-
-            for (int i = 0; i < players.Length; i++)
-            {
-                SkopjePlayer player = players[i];
-                if (player != null && player.IsOwner)
-                {
-                    LocalPlayer = player;
-                    return player;
-                }
-            }
-
-            return null;
+            return LocalPlayer;
         }
 
         internal static float MusicLevel()

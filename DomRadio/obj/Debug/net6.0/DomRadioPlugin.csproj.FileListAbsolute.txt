@@ -1,0 +1,12 @@
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\bin\Debug\net6.0\Skopje.DomRadio.deps.json
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\bin\Debug\net6.0\Skopje.DomRadio.dll
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\bin\Debug\net6.0\Skopje.DomRadio.pdb
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\DomRadioPlugin.csproj.AssemblyReference.cache
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\DomRadioPlugin.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\DomRadioPlugin.AssemblyInfoInputs.cache
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\DomRadioPlugin.AssemblyInfo.cs
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\DomRadioPlugin.csproj.CoreCompileInputs.cache
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\Skopje.DomRadio.dll
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\refint\Skopje.DomRadio.dll
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\Skopje.DomRadio.pdb
+C:\Users\andre\Desktop\SkopjeMods\DomRadio\obj\Debug\net6.0\ref\Skopje.DomRadio.dll

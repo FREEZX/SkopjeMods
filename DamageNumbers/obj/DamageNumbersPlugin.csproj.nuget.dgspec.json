@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\DamageNumbersPlugin.csproj": {}
+    "C:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\DamageNumbersPlugin.csproj": {}
   },
   "projects": {
-    "c:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\DamageNumbersPlugin.csproj": {
+    "C:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\DamageNumbersPlugin.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\DamageNumbersPlugin.csproj",
+        "projectUniqueName": "C:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\DamageNumbersPlugin.csproj",
         "projectName": "Skopje.DamageNumbers",
-        "projectPath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\DamageNumbersPlugin.csproj",
+        "projectPath": "C:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\DamageNumbersPlugin.csproj",
         "packagesPath": "C:\\Users\\andre\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a0404811fc6e51c4c5761fd11591789f\\nuget",
-        "outputPath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\obj\\",
+        "outputPath": "C:\\Users\\andre\\Desktop\\SkopjeMods\\DamageNumbers\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\andre\\AppData\\Roaming\\NuGet\\NuGet.Config",

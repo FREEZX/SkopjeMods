@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\MinimapPlugin.csproj": {}
+    "C:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\MinimapPlugin.csproj": {}
   },
   "projects": {
-    "c:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\MinimapPlugin.csproj": {
+    "C:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\MinimapPlugin.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\MinimapPlugin.csproj",
+        "projectUniqueName": "C:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\MinimapPlugin.csproj",
         "projectName": "Skopje.Minimap",
-        "projectPath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\MinimapPlugin.csproj",
+        "projectPath": "C:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\MinimapPlugin.csproj",
         "packagesPath": "C:\\Users\\andre\\AppData\\Local\\Temp\\cursor-sandbox-cache\\a0404811fc6e51c4c5761fd11591789f\\nuget",
-        "outputPath": "c:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\obj\\",
+        "outputPath": "C:\\Users\\andre\\Desktop\\SkopjeMods\\Minimap\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\andre\\AppData\\Roaming\\NuGet\\NuGet.Config",
