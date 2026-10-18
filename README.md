@@ -28,3 +28,4 @@ File: BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.789+6cea286.zip
 | Minimap | Small map under the clock, using the in-game map. | 1.0.0 | ![Broken](https://img.shields.io/badge/Broken-dc2626?style=flat-square) |
 | DOM Radio | Plays your mp3 and wav files inside the Dom, and mutes its music while the radio is on. | 1.0.0 | ![Working](https://img.shields.io/badge/Working-16a34a?style=flat-square) |
 | PeePeeMod | Hold a key to piss. The stream is sent with a server RPC so every player can see it. | 1.0.0 | ![Untested](https://img.shields.io/badge/Untested-ca8a04?style=flat-square) |
+| PioneerSize | Sets the player standing height in meters and multiplies move speed. Crouch keeps the game's crouch fraction. | 1.0.2 | ![Untested](https://img.shields.io/badge/Untested-ca8a04?style=flat-square) |
