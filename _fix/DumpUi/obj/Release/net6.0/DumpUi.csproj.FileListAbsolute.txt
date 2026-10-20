@@ -1,4 +1,0 @@
-c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net6.0\DumpUi.GeneratedMSBuildEditorConfig.editorconfig
-c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net6.0\DumpUi.AssemblyInfoInputs.cache
-c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net6.0\DumpUi.AssemblyInfo.cs
-c:\Users\andre\Desktop\SkopjeMods\_fix\DumpUi\obj\Release\net6.0\DumpUi.csproj.CoreCompileInputs.cache
