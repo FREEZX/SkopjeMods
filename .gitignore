@@ -1,5 +1,6 @@
-# Build output: bin folders and the DLLs compiled into them
+# Build output: bin/obj folders and the DLLs compiled into them
 [Bb]in/
+[Oo]bj/
 **/bin/**/*.dll
 *.dll
 
