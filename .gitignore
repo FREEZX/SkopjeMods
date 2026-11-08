@@ -1,0 +1,7 @@
+# Build output: bin folders and the DLLs compiled into them
+[Bb]in/
+**/bin/**/*.dll
+*.dll
+
+# Local fix utilities
+_fix/
